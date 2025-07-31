@@ -1,0 +1,122 @@
+swagger: '2.0'
+basePath: /api
+info:
+  title: Servo control API
+  version: 0.0.0
+paths:
+  /servo/{axis}/position/{position}:
+    post:
+      summary: Sets the position for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      - name: position
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Rotation angle
+      responses:
+        '200':
+          description: Position set
+  /servo/{axis}/tilt/{angle}:
+    post:
+      summary: Sets the position for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      - name: angle
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Maximum angle to tilt
+      responses:
+        '200':
+          description: Tilt enabled
+  /servo/{axis}/tilt:
+    post:
+      summary: Sets the position for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      responses:
+        '200':
+          description: Tilt enabled
+  /servo/{axis}/swing:
+    post:
+      summary: Sets the position for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      responses:
+        '200':
+          description: Swing enabled
+  /servo/{axis}/velocity/{velocity}:
+    post:
+      summary: Sets the velocity for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      - name: velocity
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Rotation velocity
+      responses:
+        '200':
+          description: Velocity set
+  /servo/{axis}/status:
+    get:
+      summary: Gets the status for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      responses:
+        '200':
+          description: Axis status
+  /servo/status:
+    get:
+      summary: Gets the complete status
+      tags:
+      - servo
+      responses:
+        '200':
+          description: Status for the entire system

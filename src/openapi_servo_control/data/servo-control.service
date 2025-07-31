@@ -1,0 +1,17 @@
+[Unit]
+Description=Service to access servo with open API
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/openapi-servo-control
+Restart=always
+LimitNOFILE=infinity
+LimitCORE=infinity
+StandardInput=null
+StandardOutput=journal
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target
