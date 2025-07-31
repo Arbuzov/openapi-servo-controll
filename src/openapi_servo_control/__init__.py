@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import pathlib
 import signal
 
 from .axis_container import AxisContainer

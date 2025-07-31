@@ -6,3 +6,14 @@ ln -sf /usr/local/lib/python3.7/dist-packages/openapi_servo_control/servo-contro
 systemctl enable servo-control
 
 systemctl daemon-reload
+
+## Running the service
+
+Install package dependencies and start the controller:
+
+```bash
+pip install aiohttp aiohttp_swagger aiohttp_cors Adafruit_PCA9685
+python -m openapi_servo_control
+```
+
+Swagger API documentation will be available at `http://localhost:3001/api/docs`.
