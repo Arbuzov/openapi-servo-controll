@@ -32,11 +32,20 @@ class Axis(dict):
 
     def to_json(self):
         logger.info('dictify')
-        return {'name': self.name, 'velocity': self.velocity, 'position': self.position, 'movement': self.movement}
+        return {
+            'name': self.name,
+            'velocity': self.velocity,
+            'position': self.position,
+            'movement': self.movement,
+        }
 
     def __str__(self):
         logger.info('stringify')
-        return 'Name: "' + str(self.name) + '", Velocity "' + str(self.velocity) + '", Position "' + str(self.position) + '"'
+        return (
+            f'Name: "{self.name}", '
+            f'Velocity "{self.velocity}", '
+            f'Position "{self.position}"'
+        )
 
     def set_position(self, position):
         self.position = position

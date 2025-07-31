@@ -26,19 +26,40 @@ class HttpService:
         self.runner = None
         self.axis_container = axis_container
         self.app.router.add_route(
-            'POST', r'/api/servo/{axis:\d*}/position/{position:-?\d*}', self.set_position)
+            'POST',
+            r'/api/servo/{axis:\d*}/position/{position:-?\d*}',
+            self.set_position,
+        )
         self.app.router.add_route(
-            'POST', r'/api/servo/{axis:\d*}/velocity/{velocity:-?\d*}', self.set_velocity)
+            'POST',
+            r'/api/servo/{axis:\d*}/velocity/{velocity:-?\d*}',
+            self.set_velocity,
+        )
         self.app.router.add_route(
-            'POST', r'/api/servo/{axis:\d*}/tilt', self.set_tilt)
+            'POST',
+            r'/api/servo/{axis:\d*}/tilt',
+            self.set_tilt,
+        )
         self.app.router.add_route(
-            'POST', r'/api/servo/{axis:\d*}/tilt/{angle:\d*}', self.set_tilt)
+            'POST',
+            r'/api/servo/{axis:\d*}/tilt/{angle:\d*}',
+            self.set_tilt,
+        )
         self.app.router.add_route(
-            'POST', r'/api/servo/{axis:\d*}/swing', self.set_swing)
+            'POST',
+            r'/api/servo/{axis:\d*}/swing',
+            self.set_swing,
+        )
         self.app.router.add_route(
-            'GET', r'/api/servo/{axis:\d*}/status', self.get_axis_status)
+            'GET',
+            r'/api/servo/{axis:\d*}/status',
+            self.get_axis_status,
+        )
         self.app.router.add_route(
-            'GET', '/api/servo/status', self.get_status)
+            'GET',
+            '/api/servo/status',
+            self.get_status,
+        )
         swagger_file = os.path.join(
             os.path.dirname(__file__), '../../data/api.yaml')
 
@@ -54,10 +75,16 @@ class HttpService:
 
         static_routes = [
             ('GET', '/', self.static_handler),
-            ('GET', r'/{filename:(\w|\-|\.)*\.(js|css|html|ttf|woff|woff2|ico)=?}',
-             self.static_handler),
-            ('GET', r'/{filename:assets\/.*=?}',
-             self.static_handler)
+            (
+                'GET',
+                r'/{filename:(\w|\-|\.)*\.(js|css|html|ttf|woff|woff2|ico)=?}',
+                self.static_handler,
+            ),
+            (
+                'GET',
+                r'/{filename:assets\/.*=?}',
+                self.static_handler,
+            ),
         ]
 
         for route in static_routes:
@@ -123,7 +150,9 @@ class HttpService:
         axis_id = int(request.match_info['axis'])
         position = int(request.match_info['position'])
         self.axis_container.axises.get(axis_id).set_position(position)
-        return web.json_response({'status': 200, 'message': 'Request executed'})
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
 
     async def set_velocity(self, request):
         '''
@@ -133,7 +162,9 @@ class HttpService:
         axis_id = int(request.match_info['axis'])
         velocity = int(request.match_info['velocity'])
         self.axis_container.axises.get(axis_id).set_velocity(velocity)
-        return web.json_response({'status': 200, 'message': 'Request executed'})
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
 
     async def set_tilt(self, request):
         '''
@@ -147,7 +178,9 @@ class HttpService:
         else:
             self.axis_container.axises.get(axis_id).set_tilt()
         print(self.axis_container.axises.get(axis_id))
-        return web.json_response({'status': 200, 'message': 'Request executed'})
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
 
     async def set_swing(self, request):
         '''
@@ -156,7 +189,9 @@ class HttpService:
         '''
         axis_id = int(request.match_info['axis'])
         self.axis_container.axises.get(axis_id).set_swing()
-        return web.json_response({'status': 200, 'message': 'Request executed'})
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
 
     async def get_status(self, request):
         '''
@@ -164,7 +199,9 @@ class HttpService:
         Implements url redirect from http to https
         '''
         logger.info(self.axis_container.axises)
-        return web.json_response(self.axis_container.to_json())
+        return web.json_response(
+            self.axis_container.to_json()
+        )
 
     async def get_axis_status(self, request):
         '''
@@ -173,4 +210,6 @@ class HttpService:
         '''
         axis_id = int(request.match_info['axis'])
         logger.info(self.axis_container.axises.get(axis_id))
-        return web.json_response(self.axis_container.axises.get(axis_id).to_json())
+        return web.json_response(
+            self.axis_container.axises.get(axis_id).to_json()
+        )

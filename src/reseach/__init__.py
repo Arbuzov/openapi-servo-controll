@@ -1,5 +1,4 @@
-import time
-from tkinter import *
+from tkinter import HORIZONTAL, Frame, Scale, Tk
 
 import Adafruit_PCA9685
 

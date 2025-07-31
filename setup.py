@@ -21,7 +21,10 @@ setup(
     entry_points={
         'console_scripts': [
             "openapi-servo-control=openapi_servo_control:main",
-            "install-openapi-servo-configs=openapi_servo_control.installer:main"
+            (
+                "install-openapi-servo-configs="
+                "openapi_servo_control.installer:main"
+            ),
         ]
     },
     python_requires='>=3.5.1'
