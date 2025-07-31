@@ -27,32 +27,32 @@ class HttpService:
         self.axis_container = axis_container
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d*}/position/{position:-?\d*}',
+            r'/api/servo/{axis:\d+}/position/{position:-?\d+}',
             self.set_position,
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d*}/velocity/{velocity:-?\d*}',
+            r'/api/servo/{axis:\d+}/velocity/{velocity:-?\d+}',
             self.set_velocity,
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d*}/tilt',
+            r'/api/servo/{axis:\d+}/tilt',
             self.set_tilt,
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d*}/tilt/{angle:\d*}',
+            r'/api/servo/{axis:\d+}/tilt/{angle:\d+}',
             self.set_tilt,
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d*}/swing',
+            r'/api/servo/{axis:\d+}/swing',
             self.set_swing,
         )
         self.app.router.add_route(
             'GET',
-            r'/api/servo/{axis:\d*}/status',
+            r'/api/servo/{axis:\d+}/status',
             self.get_axis_status,
         )
         self.app.router.add_route(
