@@ -199,7 +199,9 @@ class HttpService:
             except ValueError:
                 raise web.HTTPBadRequest(text='Angle must be integer')
             if angle < 0 or angle > 180:
-                raise web.HTTPBadRequest(text='Angle must be between 0 and 180')
+                raise web.HTTPBadRequest(
+                    text='Angle must be between 0 and 180'
+                )
             axis.set_swing(angle)
         else:
             axis.set_swing()
