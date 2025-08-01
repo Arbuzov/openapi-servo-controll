@@ -76,6 +76,27 @@ paths:
       responses:
         '200':
           description: Swing enabled
+  /servo/{axis}/swing/{angle}:
+    post:
+      summary: Sets the position for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      - name: angle
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Maximum angle to swing
+      responses:
+        '200':
+          description: Swing enabled
   /servo/{axis}/velocity/{velocity}:
     post:
       summary: Sets the velocity for the axis
