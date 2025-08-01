@@ -37,6 +37,16 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
+            r'/api/servo/{axis:\d+}/speed/{speed:-?\d+}',
+            self.set_speed,
+        )
+        self.app.router.add_route(
+            'GET',
+            r'/api/servo/{axis:\d+}/speed',
+            self.get_speed,
+        )
+        self.app.router.add_route(
+            'POST',
             r'/api/servo/{axis:\d+}/tilt',
             self.set_tilt,
         )
@@ -166,6 +176,18 @@ class HttpService:
             {'status': 200, 'message': 'Request executed'}
         )
 
+    async def set_speed(self, request):
+        '''
+        ---
+        Sets the speed for the required axis
+        '''
+        axis_id = int(request.match_info['axis'])
+        speed = int(request.match_info['speed'])
+        self.axis_container.axises.get(axis_id).set_speed(speed)
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
+
     async def set_tilt(self, request):
         '''
         ---
@@ -192,6 +214,15 @@ class HttpService:
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )
+
+    async def get_speed(self, request):
+        '''
+        ---
+        Returns current speed for the required axis
+        '''
+        axis_id = int(request.match_info['axis'])
+        speed = self.axis_container.axises.get(axis_id).speed
+        return web.json_response({'speed': speed})
 
     async def get_status(self, request):
         '''

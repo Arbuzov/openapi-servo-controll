@@ -17,3 +17,5 @@ python -m openapi_servo_control
 ```
 
 Swagger API documentation will be available at `http://localhost:3001/api/docs`.
+The REST API now supports setting and reading the movement speed for each axis using
+`/api/servo/{axis}/speed/{speed}` and `/api/servo/{axis}/speed`.

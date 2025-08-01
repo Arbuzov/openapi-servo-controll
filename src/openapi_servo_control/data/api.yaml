@@ -97,6 +97,42 @@ paths:
       responses:
         '200':
           description: Velocity set
+  /servo/{axis}/speed/{speed}:
+    post:
+      summary: Sets the speed for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      - name: speed
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Movement speed
+      responses:
+        '200':
+          description: Speed set
+  /servo/{axis}/speed:
+    get:
+      summary: Gets the speed for the axis
+      tags:
+      - servo
+      parameters:
+      - name: axis
+        default: 0
+        in: path
+        required: true
+        type: number
+        description: Axis number
+      responses:
+        '200':
+          description: Current speed
   /servo/{axis}/status:
     get:
       summary: Gets the status for the axis

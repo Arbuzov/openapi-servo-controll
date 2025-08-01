@@ -27,6 +27,7 @@ class Axis(dict):
         self.name = ''
         self.position = None
         self.velocity = None
+        self.speed = 1
         self.movement = None
         self.tilt_angle = Axis.tilt_angle
 
@@ -35,6 +36,7 @@ class Axis(dict):
         return {
             'name': self.name,
             'velocity': self.velocity,
+            'speed': self.speed,
             'position': self.position,
             'movement': self.movement,
         }
@@ -44,6 +46,7 @@ class Axis(dict):
         return (
             f'Name: "{self.name}", '
             f'Velocity "{self.velocity}", '
+            f'Speed "{self.speed}", '
             f'Position "{self.position}"'
         )
 
@@ -57,6 +60,9 @@ class Axis(dict):
         if self.position is None:
             self.position = 0
         self.movement = None
+
+    def set_speed(self, speed):
+        self.speed = speed
 
     def set_tilt(self, angle=None):
         self.movement = 'TILT'
@@ -81,7 +87,10 @@ class Axis(dict):
         self.move_axis()
 
     def move_axis(self):
-        self.position = self.position + self.velocity
+        step = self.velocity
+        if self.speed is not None:
+            step = self.velocity * self.speed
+        self.position = self.position + step
 
 
 class AxisContainer(object):
