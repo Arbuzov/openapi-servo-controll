@@ -14,13 +14,13 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Axis number
       - name: position
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Rotation angle
       responses:
         '200':
@@ -35,13 +35,13 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Axis number
       - name: angle
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Maximum angle to tilt
       responses:
         '200':
@@ -56,7 +56,7 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Axis number
       responses:
         '200':
@@ -71,28 +71,12 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
-        description: Axis number
-      responses:
-        '200':
-          description: Swing enabled
-  /servo/{axis}/swing/{angle}:
-    post:
-      summary: Sets the position for the axis
-      tags:
-      - servo
-      parameters:
-      - name: axis
-        default: 0
-        in: path
-        required: true
-        type: number
+        type: integer
         description: Axis number
       - name: angle
-        default: 0
-        in: path
-        required: true
-        type: number
+        in: query
+        required: false
+        type: integer
         description: Maximum angle to swing
       responses:
         '200':
@@ -107,13 +91,13 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Axis number
       - name: velocity
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Rotation velocity
       responses:
         '200':
@@ -128,7 +112,7 @@ paths:
         default: 0
         in: path
         required: true
-        type: number
+        type: integer
         description: Axis number
       responses:
         '200':
