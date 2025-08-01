@@ -50,7 +50,7 @@ class Servocontroller(object):
                     ) + 110
                     self.pwm.set_pwm(key, 0, pulse_len)
                     # logger.debug(self.axis_container.axises.get(key))
-            await asyncio.sleep(.1)
+            await asyncio.sleep(.05)
 
     def stop(self):
         self.started = False
