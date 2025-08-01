@@ -35,6 +35,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install build
           python -m build
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.8.8
         with:
