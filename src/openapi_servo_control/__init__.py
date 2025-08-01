@@ -16,7 +16,7 @@ def main():
     loop = asyncio.get_event_loop()
     axis = AxisContainer(15)
     servo_controler = Servocontroller(axis)
-    http_service = HttpService(axis)
+    http_service = HttpService(axis, servo_controler)
     signals = [signal.SIGHUP, signal.SIGTERM, signal.SIGINT]
 
     async def kill_loop():
