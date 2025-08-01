@@ -64,9 +64,11 @@ class Axis(dict):
         if angle is not None:
             self.tilt_angle = angle
 
-    def set_swing(self):
+    def set_swing(self, angle=None):
         self.movement = 'SWING'
         self.position = Axis.tilt_base
+        if angle is not None:
+            self.tilt_angle = angle
         self.velocity = 1
 
     def tilt_axis(self):
@@ -74,9 +76,9 @@ class Axis(dict):
             round(self.tilt_angle * random.random())
 
     def swing_axis(self):
-        if (self.position > Axis.tilt_base + Axis.tilt_angle / 2):
+        if (self.position > Axis.tilt_base + self.tilt_angle / 2):
             self.velocity = -1
-        elif (self.position < Axis.tilt_base - Axis.tilt_angle / 2):
+        elif (self.position < Axis.tilt_base - self.tilt_angle / 2):
             self.velocity = 1
         self.move_axis()
 

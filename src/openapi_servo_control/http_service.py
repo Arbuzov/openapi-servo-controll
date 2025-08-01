@@ -194,7 +194,23 @@ class HttpService:
         Starts swing for the required axis
         '''
         axis_id = int(request.match_info['axis'])
-        self.axis_container.axises.get(axis_id).set_swing()
+        axis = self.axis_container.axises.get(axis_id)
+        if axis is None:
+            raise web.HTTPNotFound(text='Axis not found')
+
+        angle_param = request.rel_url.query.get('angle')
+        if angle_param is not None:
+            try:
+                angle = int(angle_param)
+            except ValueError:
+                raise web.HTTPBadRequest(text='Angle must be integer')
+            if angle < 0 or angle > 180:
+                raise web.HTTPBadRequest(
+                    text='Angle must be between 0 and 180'
+                )
+            axis.set_swing(angle)
+        else:
+            axis.set_swing()
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )
