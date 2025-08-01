@@ -30,6 +30,7 @@ class Servocontroller(object):
         self.pwm.set_pwm_freq(Servocontroller.frequency)
         self.started = False
         self.axis_container = axis_container
+        self.update_delay = 0.1
 
     async def start(self):
         self.started = True
@@ -50,7 +51,14 @@ class Servocontroller(object):
                     ) + 110
                     self.pwm.set_pwm(key, 0, pulse_len)
                     # logger.debug(self.axis_container.axises.get(key))
-            await asyncio.sleep(.05)
+            await asyncio.sleep(self.update_delay)
 
     def stop(self):
         self.started = False
+
+    def set_delay(self, delay: float):
+        """Set update delay between coordinate refreshes."""
+        try:
+            self.update_delay = float(delay)
+        except (ValueError, TypeError):
+            logger.warning('Incorrect delay value: %s', delay)

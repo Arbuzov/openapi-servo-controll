@@ -21,10 +21,11 @@ class HttpService:
     server
     '''
 
-    def __init__(self, axis_container: AxisContainer):
+    def __init__(self, axis_container: AxisContainer, servo_controller):
         self.app = web.Application()
         self.runner = None
         self.axis_container = axis_container
+        self.servo_controller = servo_controller
         self.app.router.add_route(
             'POST',
             r'/api/servo/{axis:\d+}/position/{position:-?\d+}',
@@ -59,6 +60,11 @@ class HttpService:
             'GET',
             '/api/servo/status',
             self.get_status,
+        )
+        self.app.router.add_route(
+            'POST',
+            r'/api/servo/delay/{delay:?-?\d+(\.\d+)?}',
+            self.set_delay,
         )
         swagger_file = os.path.join(
             os.path.dirname(__file__), '../../data/api.yaml')
@@ -189,6 +195,17 @@ class HttpService:
         '''
         axis_id = int(request.match_info['axis'])
         self.axis_container.axises.get(axis_id).set_swing()
+        return web.json_response(
+            {'status': 200, 'message': 'Request executed'}
+        )
+
+    async def set_delay(self, request):
+        '''
+        ---
+        Sets delay between coordinate updates
+        '''
+        delay = request.match_info['delay']
+        self.servo_controller.set_delay(delay)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )

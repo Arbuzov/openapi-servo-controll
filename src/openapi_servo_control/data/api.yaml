@@ -120,3 +120,17 @@ paths:
       responses:
         '200':
           description: Status for the entire system
+  /servo/delay/{delay}:
+    post:
+      summary: Sets delay between coordinate updates
+      tags:
+      - servo
+      parameters:
+      - name: delay
+        in: path
+        required: true
+        type: number
+        description: Delay in seconds
+      responses:
+        '200':
+          description: Delay set
