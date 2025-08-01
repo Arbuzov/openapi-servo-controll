@@ -61,7 +61,7 @@ paths:
       responses:
         '200':
           description: Tilt enabled
-  /servo/{axis}/swing:
+  /servo/{axis}/swing/{angle}:
     post:
       summary: Sets the position for the axis
       tags:
@@ -74,7 +74,7 @@ paths:
         type: integer
         description: Axis number
       - name: angle
-        in: query
+        in: path
         required: false
         type: integer
         description: Maximum angle to swing

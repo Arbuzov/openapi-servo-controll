@@ -48,7 +48,7 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d+}/swing',
+            r'/api/servo/{axis:\d+}/swing/{angle:\d+}',
             self.set_swing,
         )
         self.app.router.add_route(
@@ -198,7 +198,7 @@ class HttpService:
         if axis is None:
             raise web.HTTPNotFound(text='Axis not found')
 
-        angle_param = request.rel_url.query.get('angle')
+        angle_param = request.match_info['angle']
         if angle_param is not None:
             try:
                 angle = int(angle_param)

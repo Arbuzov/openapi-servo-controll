@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="openapi_servo",
-    version='0.0.3',
+    version='0.1.0',
     maintainer='Serge Arbuzov',
     author_email='info@whitediver.com',
     maintainer_email='info@whitediver.com',
