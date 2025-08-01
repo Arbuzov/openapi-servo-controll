@@ -17,3 +17,9 @@ python -m openapi_servo_control
 ```
 
 Swagger API documentation will be available at `http://localhost:3001/api/docs`.
+
+To change the update delay for axes positions call:
+
+```bash
+curl -X POST http://localhost:3001/api/servo/delay/0.2
+```
