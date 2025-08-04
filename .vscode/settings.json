@@ -1,0 +1,14 @@
+{
+  "VsCodeTaskButtons.tasks": [
+    {
+      "label": "$(alert) Deploy",
+      "task": "Deploy package",
+      "color": "error"
+    },
+    {
+      "label": "Build",
+      "task": "Build wheel",
+      "color": "default"
+    }
+  ]
+}

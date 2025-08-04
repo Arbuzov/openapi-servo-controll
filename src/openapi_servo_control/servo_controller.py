@@ -30,7 +30,7 @@ class Servocontroller(object):
         self.pwm.set_pwm_freq(Servocontroller.frequency)
         self.started = False
         self.axis_container = axis_container
-        self.update_delay = 0.1
+        self.update_delay = 0.02  # 50 FPS для более плавного движения
 
     async def start(self):
         self.started = True

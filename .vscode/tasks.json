@@ -2,9 +2,20 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build the package",
+      "label": "Build wheel",
       "type": "shell",
-      "command": "python3 ./setup.py sdist"
+      "command": "python3 -m pip install --upgrade build && python3 -m build",
+      "problemMatcher": [
+        "$python"
+      ]
+    },
+    {
+      "label": "Deploy package",
+      "type": "shell",
+      "command": "fab -f fabfile.py deploy-package",
+      "problemMatcher": [
+        "$python"
+      ]
     }
   ]
 }

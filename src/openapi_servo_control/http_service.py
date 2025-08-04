@@ -33,7 +33,7 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d+}/velocity/{velocity:-?\d+}',
+            r'/api/servo/{axis:\d+}/velocity/{velocity:-?(?:\d+(?:\.\d+)?|\.\d+)}',
             self.set_velocity,
         )
         self.app.router.add_route(
@@ -63,8 +63,13 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/delay/{delay:?-?\d+(\.\d+)?}',
+            r'/api/servo/delay/{delay:-?\d+(\.\d+)?}',
             self.set_delay,
+        )
+        self.app.router.add_route(
+            'POST',
+            r'/api/servo/smoothness/{max_step:\d+(\.\d+)?}',
+            self.set_smoothness,
         )
         swagger_file = os.path.join(
             os.path.dirname(__file__), '../../data/api.yaml')
@@ -166,7 +171,7 @@ class HttpService:
         Sets the velocity for the required axis
         '''
         axis_id = int(request.match_info['axis'])
-        velocity = int(request.match_info['velocity'])
+        velocity = float(request.match_info['velocity'])
         self.axis_container.axises.get(axis_id).set_velocity(velocity)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
@@ -220,10 +225,22 @@ class HttpService:
         ---
         Sets delay between coordinate updates
         '''
-        delay = request.match_info['delay']
+        delay = float(request.match_info['delay'])
         self.servo_controller.set_delay(delay)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
+        )
+
+    async def set_smoothness(self, request):
+        '''
+        ---
+        Sets maximum step size for smooth movement
+        '''
+        max_step = float(request.match_info['max_step'])
+        for axis in self.axis_container.axises.values():
+            axis.max_step = max_step
+        return web.json_response(
+            {'status': 200, 'message': f'Smoothness set to {max_step}'}
         )
 
     async def get_status(self, request):

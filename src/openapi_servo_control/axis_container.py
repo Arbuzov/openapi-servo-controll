@@ -26,9 +26,11 @@ class Axis(dict):
         super().__init__()
         self.name = ''
         self.position = None
+        self.target_position = None  # Целевая позиция для плавного движения
         self.velocity = None
         self.movement = None
         self.tilt_angle = Axis.tilt_angle
+        self.max_step = 2.0  # Максимальный шаг за одно обновление для плавности
 
     def to_json(self):
         logger.info('dictify')
@@ -36,7 +38,9 @@ class Axis(dict):
             'name': self.name,
             'velocity': self.velocity,
             'position': self.position,
+            'target_position': self.target_position,
             'movement': self.movement,
+            'max_step': self.max_step,
         }
 
     def __str__(self):
@@ -48,7 +52,9 @@ class Axis(dict):
         )
 
     def set_position(self, position):
-        self.position = position
+        self.target_position = position
+        if self.position is None:
+            self.position = position  # Мгновенная установка если позиция не задана
         self.velocity = 0
         self.movement = None
 
@@ -76,14 +82,34 @@ class Axis(dict):
             round(self.tilt_angle * random.random())
 
     def swing_axis(self):
+        # Более плавное swing движение
         if (self.position > Axis.tilt_base + self.tilt_angle / 2):
-            self.velocity = -1
+            self.velocity = -min(1.0, self.max_step)
         elif (self.position < Axis.tilt_base - self.tilt_angle / 2):
-            self.velocity = 1
+            self.velocity = min(1.0, self.max_step)
         self.move_axis()
 
     def move_axis(self):
-        self.position = self.position + self.velocity
+        # Плавное движение с ограничением шага
+        if self.velocity != 0:
+            step = min(abs(self.velocity), self.max_step)
+            if self.velocity > 0:
+                self.position = self.position + step
+            else:
+                self.position = self.position - step
+        
+        # Плавное движение к целевой позиции
+        if self.target_position is not None and self.velocity == 0:
+            diff = self.target_position - self.position
+            if abs(diff) > 0.1:  # Небольшая зона нечувствительности
+                step = min(abs(diff), self.max_step)
+                if diff > 0:
+                    self.position = self.position + step
+                else:
+                    self.position = self.position - step
+            else:
+                self.position = self.target_position
+                self.target_position = None
 
 
 class AxisContainer(object):
@@ -103,12 +129,13 @@ class AxisContainer(object):
 
     def apply_velocity(self):
         for axis in self.axises:
-            if self.axises.get(axis).movement == 'TILT':
-                self.axises.get(axis).tilt_axis()
-            elif self.axises.get(axis).movement == 'SWING':
-                self.axises.get(axis).swing_axis()
-            elif self.axises.get(axis).velocity is not None:
-                self.axises.get(axis).move_axis()
+            axis_obj = self.axises.get(axis)
+            if axis_obj.movement == 'TILT':
+                axis_obj.tilt_axis()
+            elif axis_obj.movement == 'SWING':
+                axis_obj.swing_axis()
+            elif axis_obj.velocity is not None or axis_obj.target_position is not None:
+                axis_obj.move_axis()
 
     def set_axis_value(self, axis_id, value):
         self.axises.get(axis_id).position = value
