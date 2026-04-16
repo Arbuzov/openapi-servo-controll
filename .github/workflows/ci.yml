@@ -47,10 +47,20 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, pi-deploy]
     env:
-      PI_HOST: pi@pizero.local
+      PI_HOST: ${{ secrets.PI_HOST }}
       PI_REPO_DIR: /opt/openapi-servo-controll
     steps:
-      - name: Deploy to Pi Zero over SSH
+      - name: Check PI_HOST secret
+        id: check
+        run: |
+          if [ -z "${PI_HOST:-}" ]; then
+            echo "PI_HOST secret is not configured; skipping deploy."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy to Pi over SSH
+        if: steps.check.outputs.skip == 'false'
         run: |
           ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes "$PI_HOST" bash -s <<EOF
           set -euo pipefail
