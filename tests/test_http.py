@@ -83,6 +83,10 @@ class HttpServiceTestCase(AioHTTPTestCase):
         assert data['name'] == 'Axis 0'
         assert data['position'] == 60
 
+    async def test_get_axis_status_unknown_axis(self):
+        resp = await self.client.get('/api/servo/99/status')
+        assert resp.status == 404
+
     async def test_get_status_returns_list(self):
         resp = await self.client.get('/api/servo/status')
         assert resp.status == 200

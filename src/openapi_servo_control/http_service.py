@@ -260,7 +260,8 @@ class HttpService:
         Implements url redirect from http to https
         '''
         axis_id = int(request.match_info['axis'])
-        logger.info(self.axis_container.axises.get(axis_id))
-        return web.json_response(
-            self.axis_container.axises.get(axis_id).to_json()
-        )
+        axis = self.axis_container.axises.get(axis_id)
+        if axis is None:
+            raise web.HTTPNotFound(text='Axis not found')
+        logger.info(axis)
+        return web.json_response(axis.to_json())
