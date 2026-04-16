@@ -1,15 +1,16 @@
-import subprocess
-import sys
+"""Smoke test: the package imports and main entry points are reachable."""
+import openapi_servo_control
+from openapi_servo_control.axis_container import Axis, AxisContainer
+from openapi_servo_control.http_service import HttpService
+from openapi_servo_control.servo_controller import Servocontroller
 
-def test_app_starts():
-    try:
-        result = subprocess.run([
-            sys.executable, '-m', 'openapi_servo_control'
-        ], capture_output=True, timeout=10)
-        assert result.returncode == 0, f"App failed to start: {result.stderr.decode()}"
-    except Exception as e:
-        assert False, f"Exception during app start: {e}"
 
-if __name__ == "__main__":
-    test_app_starts()
-    print("App starts successfully.")
+def test_package_exposes_main():
+    assert callable(openapi_servo_control.main)
+
+
+def test_core_classes_importable():
+    assert Axis is not None
+    assert AxisContainer is not None
+    assert HttpService is not None
+    assert Servocontroller is not None

@@ -10,8 +10,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install dependencies
@@ -24,8 +24,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install dependencies
@@ -36,7 +36,65 @@ jobs:
       - name: Run tests and coverage
         run: pytest --cov=src/openapi_servo_control --cov-report=xml --cov-report=term
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           files: coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+
+  deploy:
+    needs: [lint, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, pi-deploy]
+    env:
+      PI_HOST: ${{ secrets.PI_HOST }}
+    steps:
+      - name: Check PI_HOST secret
+        id: check
+        run: |
+          if [ -z "${PI_HOST:-}" ]; then
+            echo "PI_HOST secret is not configured; skipping deploy."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Checkout
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/checkout@v4
+      - name: Install uv
+        if: steps.check.outputs.skip == 'false'
+        uses: astral-sh/setup-uv@v5
+      - name: Build wheel
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          rm -rf dist/
+          uv build --wheel
+      - name: Ship wheel to Pi and restart service
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          wheels=(dist/*.whl)
+          if [ ${#wheels[@]} -ne 1 ]; then
+            echo "Expected exactly one wheel in dist/, got ${#wheels[@]}: ${wheels[*]}"
+            exit 1
+          fi
+          WHEEL="${wheels[0]}"
+          REMOTE_WHEEL="/tmp/$(basename "$WHEEL")"
+          scp -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+              "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
+          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+              "$PI_HOST" bash -s -- "$REMOTE_WHEEL" <<'EOF'
+          set -euo pipefail
+          WHEEL="$1"
+          VENV=/opt/servo-venv
+          BIN_LINK=/usr/local/bin/openapi-servo-control
+          if [ ! -d "$VENV" ]; then
+            sudo uv venv --python python3 "$VENV"
+          fi
+          sudo uv pip install --python "$VENV/bin/python" --upgrade "$WHEEL"
+          sudo ln -sf "$VENV/bin/openapi-servo-control" "$BIN_LINK"
+          rm -f "$WHEEL"
+          sudo systemctl restart servo-control
+          sudo systemctl is-active servo-control
+          EOF

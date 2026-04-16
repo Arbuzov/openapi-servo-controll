@@ -30,7 +30,8 @@ class Axis(dict):
         self.velocity = None
         self.movement = None
         self.tilt_angle = Axis.tilt_angle
-        self.max_step = 2.0  # Максимальный шаг за одно обновление для плавности
+        # Максимальный шаг за одно обновление для плавности
+        self.max_step = 2.0
 
     def to_json(self):
         logger.info('dictify')
@@ -54,7 +55,8 @@ class Axis(dict):
     def set_position(self, position):
         self.target_position = position
         if self.position is None:
-            self.position = position  # Мгновенная установка если позиция не задана
+            # Мгновенная установка если позиция не задана
+            self.position = position
         self.velocity = 0
         self.movement = None
 
@@ -97,7 +99,7 @@ class Axis(dict):
                 self.position = self.position + step
             else:
                 self.position = self.position - step
-        
+
         # Плавное движение к целевой позиции
         if self.target_position is not None and self.velocity == 0:
             diff = self.target_position - self.position
@@ -134,7 +136,8 @@ class AxisContainer(object):
                 axis_obj.tilt_axis()
             elif axis_obj.movement == 'SWING':
                 axis_obj.swing_axis()
-            elif axis_obj.velocity is not None or axis_obj.target_position is not None:
+            elif (axis_obj.velocity is not None
+                  or axis_obj.target_position is not None):
                 axis_obj.move_axis()
 
     def set_axis_value(self, axis_id, value):

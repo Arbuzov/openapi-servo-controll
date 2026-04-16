@@ -33,7 +33,8 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d+}/velocity/{velocity:-?(?:\d+(?:\.\d+)?|\.\d+)}',
+            r'/api/servo/{axis:\d+}/velocity/'
+            r'{velocity:-?(?:\d+(?:\.\d+)?|\.\d+)}',
             self.set_velocity,
         )
         self.app.router.add_route(
@@ -153,14 +154,20 @@ class HttpService:
             logging.info('error while serve static %s', error)
         return web.FileResponse(STATIC_FOLDER + filename)
 
+    def _get_axis_or_404(self, request):
+        axis_id = int(request.match_info['axis'])
+        axis = self.axis_container.axises.get(axis_id)
+        if axis is None:
+            raise web.HTTPNotFound(text='Axis not found')
+        return axis
+
     async def set_position(self, request):
         '''
         ---
         Sets the position for the required axis
         '''
-        axis_id = int(request.match_info['axis'])
         position = int(request.match_info['position'])
-        self.axis_container.axises.get(axis_id).set_position(position)
+        self._get_axis_or_404(request).set_position(position)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )
@@ -170,9 +177,8 @@ class HttpService:
         ---
         Sets the velocity for the required axis
         '''
-        axis_id = int(request.match_info['axis'])
         velocity = float(request.match_info['velocity'])
-        self.axis_container.axises.get(axis_id).set_velocity(velocity)
+        self._get_axis_or_404(request).set_velocity(velocity)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )
@@ -182,13 +188,9 @@ class HttpService:
         ---
         Starts tilt for the required axis
         '''
-        axis_id = int(request.match_info['axis'])
+        axis = self._get_axis_or_404(request)
         angle = int(request.match_info.get('angle', Axis.tilt_angle))
-        if angle is not None:
-            self.axis_container.axises.get(axis_id).set_tilt(angle)
-        else:
-            self.axis_container.axises.get(axis_id).set_tilt()
-        print(self.axis_container.axises.get(axis_id))
+        axis.set_tilt(angle)
         return web.json_response(
             {'status': 200, 'message': 'Request executed'}
         )
@@ -198,10 +200,7 @@ class HttpService:
         ---
         Starts swing for the required axis
         '''
-        axis_id = int(request.match_info['axis'])
-        axis = self.axis_container.axises.get(axis_id)
-        if axis is None:
-            raise web.HTTPNotFound(text='Axis not found')
+        axis = self._get_axis_or_404(request)
 
         angle_param = request.match_info['angle']
         if angle_param is not None:
@@ -258,8 +257,6 @@ class HttpService:
         ---
         Implements url redirect from http to https
         '''
-        axis_id = int(request.match_info['axis'])
-        logger.info(self.axis_container.axises.get(axis_id))
-        return web.json_response(
-            self.axis_container.axises.get(axis_id).to_json()
-        )
+        axis = self._get_axis_or_404(request)
+        logger.info(axis)
+        return web.json_response(axis.to_json())
