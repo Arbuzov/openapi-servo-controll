@@ -48,7 +48,6 @@ jobs:
     runs-on: [self-hosted, pi-deploy]
     env:
       PI_HOST: ${{ secrets.PI_HOST }}
-      PI_REPO_DIR: /opt/openapi-servo-controll
     steps:
       - name: Check PI_HOST secret
         id: check
@@ -59,14 +58,26 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Deploy to Pi over SSH
+      - name: Checkout
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/checkout@v4
+      - name: Build wheel
         if: steps.check.outputs.skip == 'false'
         run: |
+          python3 -m pip install --upgrade pip build
+          python3 -m build --wheel
+      - name: Ship wheel to Pi and restart service
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          WHEEL=$(ls dist/*.whl | head -n1)
+          REMOTE_WHEEL="/tmp/$(basename "$WHEEL")"
+          scp -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+              "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
           ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes "$PI_HOST" bash -s <<EOF
           set -euo pipefail
-          cd "$PI_REPO_DIR"
-          git fetch --prune origin
-          git reset --hard origin/main
+          sudo pip3 install --upgrade "$REMOTE_WHEEL"
+          rm -f "$REMOTE_WHEEL"
           sudo systemctl restart servo-control
           sudo systemctl is-active servo-control
           EOF
