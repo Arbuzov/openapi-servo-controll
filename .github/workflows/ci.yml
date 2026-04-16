@@ -10,8 +10,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install dependencies
@@ -24,8 +24,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install dependencies
@@ -36,7 +36,26 @@ jobs:
       - name: Run tests and coverage
         run: pytest --cov=src/openapi_servo_control --cov-report=xml --cov-report=term
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           files: coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+
+  deploy:
+    needs: [lint, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, homelab]
+    steps:
+      - name: Deploy to Pi Zero
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: pizero.local
+          username: ${{ secrets.PI_SSH_USER }}
+          key: ${{ secrets.PI_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/openapi-servo-controll
+            git pull --ff-only
+            sudo systemctl restart servo-control
+            sudo systemctl is-active servo-control
