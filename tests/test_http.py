@@ -75,6 +75,18 @@ class HttpServiceTestCase(AioHTTPTestCase):
         resp = await self.client.post('/api/servo/99/swing/30')
         assert resp.status == 404
 
+    async def test_set_position_unknown_axis(self):
+        resp = await self.client.post('/api/servo/99/position/45')
+        assert resp.status == 404
+
+    async def test_set_velocity_unknown_axis(self):
+        resp = await self.client.post('/api/servo/99/velocity/1.0')
+        assert resp.status == 404
+
+    async def test_set_tilt_unknown_axis(self):
+        resp = await self.client.post('/api/servo/99/tilt/30')
+        assert resp.status == 404
+
     async def test_get_axis_status(self):
         self.container.axises[0].set_position(60)
         resp = await self.client.get('/api/servo/0/status')

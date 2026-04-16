@@ -66,12 +66,20 @@ jobs:
         uses: astral-sh/setup-uv@v5
       - name: Build wheel
         if: steps.check.outputs.skip == 'false'
-        run: uv build --wheel
+        run: |
+          rm -rf dist/
+          uv build --wheel
       - name: Ship wheel to Pi and restart service
         if: steps.check.outputs.skip == 'false'
         run: |
           set -euo pipefail
-          WHEEL=$(ls dist/*.whl | head -n1)
+          shopt -s nullglob
+          wheels=(dist/*.whl)
+          if [ ${#wheels[@]} -ne 1 ]; then
+            echo "Expected exactly one wheel in dist/, got ${#wheels[@]}: ${wheels[*]}"
+            exit 1
+          fi
+          WHEEL="${wheels[0]}"
           REMOTE_WHEEL="/tmp/$(basename "$WHEEL")"
           scp -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
               "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
