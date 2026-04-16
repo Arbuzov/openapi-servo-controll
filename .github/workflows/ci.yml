@@ -45,17 +45,14 @@ jobs:
   deploy:
     needs: [lint, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, homelab]
+    runs-on: [self-hosted, pi-deploy]
     steps:
-      - name: Deploy to Pi Zero
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: pizero.local
-          username: ${{ secrets.PI_SSH_USER }}
-          key: ${{ secrets.PI_SSH_KEY }}
-          script: |
-            set -e
-            cd /opt/openapi-servo-controll
-            git pull --ff-only
-            sudo systemctl restart servo-control
-            sudo systemctl is-active servo-control
+      - uses: actions/checkout@v4
+      - name: Install package
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install .
+      - name: Restart servo-control service
+        run: |
+          sudo systemctl restart servo-control
+          sudo systemctl is-active servo-control
