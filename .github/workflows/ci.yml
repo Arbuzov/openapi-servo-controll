@@ -46,13 +46,17 @@ jobs:
     needs: [lint, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, pi-deploy]
+    env:
+      PI_HOST: pi@pizero.local
+      PI_REPO_DIR: /opt/openapi-servo-controll
     steps:
-      - uses: actions/checkout@v4
-      - name: Install package
+      - name: Deploy to Pi Zero over SSH
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install .
-      - name: Restart servo-control service
-        run: |
+          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes "$PI_HOST" bash -s <<EOF
+          set -euo pipefail
+          cd "$PI_REPO_DIR"
+          git fetch --prune origin
+          git reset --hard origin/main
           sudo systemctl restart servo-control
           sudo systemctl is-active servo-control
+          EOF
