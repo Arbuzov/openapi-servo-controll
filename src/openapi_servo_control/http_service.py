@@ -33,7 +33,8 @@ class HttpService:
         )
         self.app.router.add_route(
             'POST',
-            r'/api/servo/{axis:\d+}/velocity/{velocity:-?(?:\d+(?:\.\d+)?|\.\d+)}',
+            r'/api/servo/{axis:\d+}/velocity/'
+            r'{velocity:-?(?:\d+(?:\.\d+)?|\.\d+)}',
             self.set_velocity,
         )
         self.app.router.add_route(
