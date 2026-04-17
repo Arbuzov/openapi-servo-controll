@@ -92,12 +92,18 @@ jobs:
           # pi-ssh-key Secret is mounted at ~/.ssh as root:root 0600 and
           # readOnly, so the runner user can't read it or write known_hosts.
           # Copy the key out with the right perms and use a writable
-          # known_hosts in /tmp for this step.
-          SSH_KEY=/tmp/pi_ssh_key
-          KNOWN_HOSTS=/tmp/pi_known_hosts
+          # known_hosts under /tmp for this step. Use mktemp so repeated
+          # runs on the same runner can't collide on a stale /tmp file.
+          SRC_KEY="$HOME/.ssh/id_ed25519"
+          if ! sudo test -f "$SRC_KEY"; then
+            echo "SSH key not found at $SRC_KEY - is the pi-ssh-key Secret mounted?" >&2
+            exit 1
+          fi
+          SSH_KEY="$(mktemp /tmp/pi_ssh_key.XXXXXX)"
+          KNOWN_HOSTS="$(mktemp /tmp/pi_known_hosts.XXXXXX)"
           sudo install -o "$(id -u)" -g "$(id -g)" -m 0600 \
-              /home/runner/.ssh/id_ed25519 "$SSH_KEY"
-          : > "$KNOWN_HOSTS"
+              "$SRC_KEY" "$SSH_KEY"
+          trap 'rm -f "$SSH_KEY" "$KNOWN_HOSTS"' EXIT
 
           SSH_OPTS=(
             -i "$SSH_KEY"
