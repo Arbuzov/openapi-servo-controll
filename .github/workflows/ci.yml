@@ -119,6 +119,7 @@ jobs:
           WHEEL="$1"
           VENV=/opt/servo-venv
           BIN_LINK=/usr/local/bin/openapi-servo-control
+          UNIT=servo-control
           if [ ! -d "$VENV" ]; then
             sudo python3 -m venv "$VENV"
             sudo "$VENV/bin/pip" install --upgrade pip
@@ -126,6 +127,12 @@ jobs:
           sudo "$VENV/bin/pip" install --upgrade "$WHEEL"
           sudo ln -sf "$VENV/bin/openapi-servo-control" "$BIN_LINK"
           rm -f "$WHEEL"
-          sudo systemctl restart servo-control
-          sudo systemctl is-active servo-control
+          # Drop api.yaml into /etc/openapi_servo_control and the systemd
+          # unit into /etc/systemd/system. Idempotent: the installer uses
+          # shutil.copy which overwrites on re-run.
+          sudo "$VENV/bin/install-openapi-servo-configs"
+          sudo systemctl daemon-reload
+          sudo systemctl enable "$UNIT"
+          sudo systemctl restart "$UNIT"
+          sudo systemctl is-active "$UNIT"
           EOF
