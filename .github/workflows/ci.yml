@@ -88,10 +88,27 @@ jobs:
           fi
           WHEEL="${wheels[0]}"
           REMOTE_WHEEL="/tmp/$(basename "$WHEEL")"
-          scp -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
-              "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
-          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
-              "$PI_HOST" bash -s -- "$REMOTE_WHEEL" <<'EOF'
+
+          # pi-ssh-key Secret is mounted at ~/.ssh as root:root 0600 and
+          # readOnly, so the runner user can't read it or write known_hosts.
+          # Copy the key out with the right perms and use a writable
+          # known_hosts in /tmp for this step.
+          SSH_KEY=/tmp/pi_ssh_key
+          KNOWN_HOSTS=/tmp/pi_known_hosts
+          sudo install -o "$(id -u)" -g "$(id -g)" -m 0600 \
+              /home/runner/.ssh/id_ed25519 "$SSH_KEY"
+          : > "$KNOWN_HOSTS"
+
+          SSH_OPTS=(
+            -i "$SSH_KEY"
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=accept-new
+            -o UserKnownHostsFile="$KNOWN_HOSTS"
+            -o BatchMode=yes
+          )
+
+          scp "${SSH_OPTS[@]}" "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
+          ssh "${SSH_OPTS[@]}" "$PI_HOST" bash -s -- "$REMOTE_WHEEL" <<'EOF'
           set -euo pipefail
           WHEEL="$1"
           VENV=/opt/servo-venv
