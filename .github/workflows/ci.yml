@@ -88,10 +88,33 @@ jobs:
           fi
           WHEEL="${wheels[0]}"
           REMOTE_WHEEL="/tmp/$(basename "$WHEEL")"
-          scp -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
-              "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
-          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
-              "$PI_HOST" bash -s -- "$REMOTE_WHEEL" <<'EOF'
+
+          # pi-ssh-key Secret is mounted at ~/.ssh as root:root 0600 and
+          # readOnly, so the runner user can't read it or write known_hosts.
+          # Copy the key out with the right perms and use a writable
+          # known_hosts under /tmp for this step. Use mktemp so repeated
+          # runs on the same runner can't collide on a stale /tmp file.
+          SRC_KEY="$HOME/.ssh/id_ed25519"
+          if ! sudo test -f "$SRC_KEY"; then
+            echo "SSH key not found at $SRC_KEY - is the pi-ssh-key Secret mounted?" >&2
+            exit 1
+          fi
+          SSH_KEY="$(mktemp /tmp/pi_ssh_key.XXXXXX)"
+          KNOWN_HOSTS="$(mktemp /tmp/pi_known_hosts.XXXXXX)"
+          sudo install -o "$(id -u)" -g "$(id -g)" -m 0600 \
+              "$SRC_KEY" "$SSH_KEY"
+          trap 'rm -f "$SSH_KEY" "$KNOWN_HOSTS"' EXIT
+
+          SSH_OPTS=(
+            -i "$SSH_KEY"
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=accept-new
+            -o UserKnownHostsFile="$KNOWN_HOSTS"
+            -o BatchMode=yes
+          )
+
+          scp "${SSH_OPTS[@]}" "$WHEEL" "$PI_HOST:$REMOTE_WHEEL"
+          ssh "${SSH_OPTS[@]}" "$PI_HOST" bash -s -- "$REMOTE_WHEEL" <<'EOF'
           set -euo pipefail
           WHEEL="$1"
           VENV=/opt/servo-venv
